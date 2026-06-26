@@ -26,11 +26,18 @@ parser.add_argument('--threshold', type=float,
                     help='threshold to test. If -1, runs a default sweep', default=-1.0)
 parser.add_argument('--nchannels', type=int,
                     help='number of channels to phase', default=4)
-
+parser.add_argument('--seed', type=int,
+                    help='Seed for reproducability', default=None)
 args = parser.parse_args()
 
+if args.seed is None:
+    print('Seed not provided, generating random seed')
+    seed = int(np.random.get_state()[1][0])
+else:
+    seed = args.seed
+
 if(args.threshold == -1.0):
-    thresholds = np.arange(0.5, 2.0, 0.05)
+    thresholds = np.arange(35, 39, 0.1)
 else:
     thresholds = np.array([float(args.thresholds)])
 
@@ -89,7 +96,7 @@ bandwidth = integrate.trapezoid(np.abs(filt_highres) ** 2, fff)
 Vrms_ratio = np.sqrt(bandwidth / (max_freq - min_freq))
 amplitude = Vrms / Vrms_ratio
 
-pattern = f"pa_trigger_rate_{n_channels:d}channels_{upsampling_factor}xupsampling"
+pattern = f"pa_trigger_rate_{n_channels:d}channels_{upsampling_factor}_from{thresholds[0]:.1f}-to{thresholds[-1]:.1f}_det-{det_file[:-5]}"
 
 triggerSimulator = NuRadioReco.modules.phasedarray.phasedArrayTrigger.PhasedArrayTrigger()
 thresholdSimulator = NuRadioReco.modules.trigger.simpleThreshold.triggerSimulator()
@@ -138,6 +145,25 @@ def loop(zipped):
 if __name__ == "__main__":
     pool = ThreadPool(ncpus)
 
+    header_lines = []
+    header_lines.append(f"detector_description:\t{det_file}\n")
+    header_lines.append(f"n_channels_to_phase:\t{n_channels}\n")
+    header_lines.append(f"upsampling_factor:\t{upsampling_factor}\n")
+    header_lines.append(f"thresholds_tested:\t{thresholds.tolist()}\n")
+    header_lines.append(f"ntries_per_threshold:\t{ntrials}\n")
+    header_lines.append(f"ncpus:\t{ncpus}\n")
+    header_lines.append(f"seed:\t{seed}\n")
+    header_lines.append(f"n_samples_per_trace:\t{n_samples}\n")
+    header_lines.append(f"sampling_rate_Hz:\t{sampling_rate}\n")
+    header_lines.append(f"window_length_samples:\t{window_length}\n")
+    header_lines.append(f"step_length_samples:\t{step_length}\n")
+    header_lines.append(f"Vrms_input:\t{Vrms}\n")
+    header_lines.append(f"calculated_bandwidth_Hz:\t{bandwidth}\n")
+    header_lines.append(f"amplitude_scaling:\t{amplitude}\n")
+    header = "# Parameters used to generate data\n" + "".join(header_lines) + "# Columns: threshold, n_triggers, total_time_s, rate_Hz\n"
+    with open(f"{pattern}.txt", "a") as fout:
+        fout.write(header)
+
     for threshold in thresholds:
         n_triggers = 0
         i = 0
@@ -151,7 +177,7 @@ if __name__ == "__main__":
             i += n_pool
             t00 = time.time()
 
-            results = pool.map(loop, zip(threshold * np.ones(n_pool), np.random.get_state()[1][0] + i + np.arange(n_pool)))
+            results = pool.map(loop, zip(threshold * np.ones(n_pool), seed + i + np.arange(n_pool)))
 
             n_triggers += np.sum(results)
             rate = 1. * n_triggers / (i * n_samples * dt)
@@ -161,4 +187,4 @@ if __name__ == "__main__":
         with open(f"{pattern}.txt", "a") as fout:
             fout.write(f"{threshold}\t{n_triggers}\t{i*n_samples*dt}\t{rate}\n")
             fout.close()
-        print(f"threshold = {threshold:.3f}: n_triggers = {n_triggers} -> rate = {rate/units.Hz:.0f} Hz, {(time.time() -  t0)/i*1000:.1f}ms per event -> {(time.time() -  t0)/n_triggers*100/60:.1f}min for 100 triggered events")
+        print(f"threshold = {threshold:.3f}: n_triggers = {n_triggers} -> rate = {rate/units.Hz:.1f} Hz, {(time.time() -  t0)/i*1000:.1f}ms per event -> {(time.time() -  t0)/n_triggers*100/60:.1f}min for 100 triggered events")

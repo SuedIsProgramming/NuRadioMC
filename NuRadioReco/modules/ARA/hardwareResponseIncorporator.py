@@ -25,6 +25,19 @@ class hardwareResponseIncorporator:
     def begin(self, debug=False):
         self.__debug = debug
 
+    def get_filter(self, frequencies, station_id, channel_id, det, sim_to_data=True):
+            # log warning like fyi if you provide station id and channel id and det tell them its not used so user doesnt think that its channel dependent
+            # use logger.warn
+            analog_components.load_system_response()
+            system_response = analog_components.get_system_response(frequencies)
+            system_complex_response = system_response['gain'] * system_response['phase']
+            # for ARA system response already includes all info. ARA uses pre measured system responses so just use system since it consists of cable+amplifier+filters
+
+            if sim_to_data:
+                return system_complex_response
+            else:
+                return 1. / system_complex_response
+            
     @register_run()
     def run(self, evt, station, det, sim_to_data=False):
         """

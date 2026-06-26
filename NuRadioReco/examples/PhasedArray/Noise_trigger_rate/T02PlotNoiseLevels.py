@@ -10,10 +10,10 @@ single_rates = [100.0 * units.Hz, 10.0 * units.Hz, 1.0 * units.Hz]
 
 max_entry = 20
 
-pattern = "pa_trigger_rate_8channels_4xupsampiling_half_bigrun"
+pattern = "pa_trigger_rate_4channels_2_from35.0-to38.9_det-classifier_station"
 
 title = pattern
-thresholds, n_triggers, ts, rates = np.loadtxt(str(pattern) + ".txt", unpack=True)
+thresholds, n_triggers, ts, rates = np.loadtxt(str(pattern) + ".txt", unpack=True, skiprows=16)
 
 thresholds = np.round(thresholds, 5)
 
@@ -92,7 +92,7 @@ ax.grid(which='minor', alpha=0.25)
 ax.set_title(title)
 ax.set_xlabel("Threshold / Vrms")
 ax.set_ylabel("rate [Hz]")
-ax.set_xlim(0.0, 2.5)
 ax.set_ylim(1e0, 1e7)
 fig.tight_layout()
+plt.savefig('plot')
 plt.show()
