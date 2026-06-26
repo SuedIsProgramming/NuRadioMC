@@ -4,6 +4,8 @@ from NuRadioReco.modules.io import NuRadioRecoio
 import logging
 logger = logging.getLogger('NuRadioReco.eventReader')
 
+# Can use by saying "with eventReader as reader:" and then have all ur processes inside. This automatically enters and exits without needing to manually call enter and exit.
+# Credit to Taylor St Jean
 
 class eventReader:
     """
@@ -25,6 +27,13 @@ class eventReader:
         """
 
         self.__fin = NuRadioRecoio.NuRadioRecoio(filename, parse_header=read_detector, log_level=log_level)
+
+    def __enter__(self):
+        self.begin()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.end()
 
     @register_run()
     def run(self):
