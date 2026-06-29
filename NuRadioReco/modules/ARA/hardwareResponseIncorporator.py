@@ -25,7 +25,7 @@ class hardwareResponseIncorporator:
     def begin(self, debug=False):
         self.__debug = debug
 
-    def get_filter(self, frequencies, station_id=None, channel_id=None, det=None, sim_to_data=False):
+    def get_filter(self, frequencies, station_id=None, channel_id=None, det=None, sim_to_data=False, path=None):
         """
         Helper function to return the filter that the module applies. Loads entire system response from interpolating data of ARA_Electronics_TotalGain_TwoFilters.txt.
 
@@ -58,8 +58,8 @@ class hardwareResponseIncorporator:
             logger.warning("get_filter() warning: station_id/channel_id/det provided but not used."
                            "ARA system response is not channel-dependent")
 
-        analog_components.load_system_response()
-        system_response = analog_components.get_system_response(frequencies)
+        analog_components.load_system_response(path)
+        system_response = analog_components.get_system_response(frequencies, path)
         system_complex_response = system_response['gain'] * system_response['phase']
 
         if sim_to_data:
@@ -68,7 +68,7 @@ class hardwareResponseIncorporator:
             return 1. / system_complex_response
         
     @register_run()
-    def run(self, evt, station, det, sim_to_data=False):
+    def run(self, evt, station, det, sim_to_data=False, path=None):
         """
         Switch sim_to_data to go from simulation to data or otherwise.
         """
@@ -78,7 +78,7 @@ class hardwareResponseIncorporator:
         for channel in channels:
 
             frequencies = channel.get_frequencies()
-            system_response = analog_components.get_system_response(frequencies)
+            system_response = analog_components.get_system_response(frequencies, path)
             trace_fft = channel.get_frequency_spectrum()
 
             if sim_to_data:

@@ -4,7 +4,7 @@ from NuRadioReco.utilities import units
 from scipy.interpolate import interp1d
 
 
-def load_system_response(path=os.path.dirname(os.path.realpath(__file__))):
+def load_system_response(path=None):
     """
     Default file was imported from:
     https://github.com/bhokansonfasig/pyrex/tree/master/pyrex/custom/ara/data
@@ -15,8 +15,11 @@ def load_system_response(path=os.path.dirname(os.path.realpath(__file__))):
         Path to the file containing the system response
     """
 
-    data = np.loadtxt(os.path.join(path, "HardwareResponses/ARA_Electronics_TotalGain_TwoFilters.txt"),
-                      skiprows=3, delimiter=',')
+    if path is None:
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "HardwareResponses/ARA_Electronics_TotalGain_TwoFilters.txt")
+
+    data = np.loadtxt(path, skiprows=3, delimiter=',')
+        
     default = {}
     default['frequencies'] = data[:, 0] * units.MHz
     default['gain'] = data[:, 1]  # unitless
@@ -29,10 +32,14 @@ system_response = {}
 system_response['default'] = load_system_response()
 
 
-def get_system_response(frequencies):
+def get_system_response(frequencies, path=None):
+    if path is not None:
+        system_response['default'] = load_system_response(path)
+
     orig_frequencies = system_response['default']['frequencies']
     phase = system_response['default']['phase']
     gain = system_response['default']['gain']
+    print(gain) #checking values
 
     interp_phase = interp1d(orig_frequencies, np.unwrap(phase), bounds_error=False, fill_value=0)
     interp_gain = interp1d(orig_frequencies, gain, bounds_error=False, fill_value=0)
