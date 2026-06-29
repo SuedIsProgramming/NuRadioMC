@@ -203,7 +203,9 @@ def get_attenuation_length(z, frequency, model):
         bulk_att_length_f = freq_inter + freq_slope * frequency
         att_length_f = bulk_att_length_f * np.poly1d(np.flip(fit_values_GL2))(z)
 
-    elif model == 'GL3':
+    elif model == 'GL3' or model == 'GL3_plus_sigma' or model == 'GL3_minus_sigma':
+        # if specified, add or subtract 1 sigma (~20%) from attenuation length value. 
+        # uncertainty from https://arxiv.org/abs/2201.07846 Fig. 7
         if hasattr(z, '__len__'):
             # If z is an array, make sure not not use the numba-compiled functions
             slopes = _gl3_slope_interpolation(-z)
@@ -220,6 +222,12 @@ def get_attenuation_length(z, frequency, model):
         #         frequency = 0.6 * units.GHz
 
         att_length_f = slopes * frequency + offsets
+
+        if model == 'GL3_plus_sigma':
+            att_length_f = att_length_f + att_length_f * 0.2
+
+        if model == 'GL3_minus_sigma':
+            att_length_f = att_length_f - att_length_f * 0.2
 
     elif model == "MB1":
         # 10.3189/2015JoG14J214 measured the depth-averaged attenuation length as a function of frequency

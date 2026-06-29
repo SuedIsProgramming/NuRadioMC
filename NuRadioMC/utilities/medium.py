@@ -153,6 +153,50 @@ class greenland_simple(medium_base.IceModelSimple):
             delta_n = 0.51,
             )
 
+class greenland_simple_plus_nsigma(medium_base.IceModelSimple):
+    def __init__(self):
+        # C. Deaconu, fit to data from Hawley '08, Alley '88 plus 1 sigma (delta_n)
+        # rho(z) = 917 - 602 * exp (-z/37.25), using n = 1 + 0.78 rho(z)/rho_0
+        super().__init__(
+            z_bottom = -3000*units.meter,
+            n_ice = 1.78,
+            z_0 = 37.25*units.meter,
+            delta_n = 0.51119,
+            )
+
+class greenland_simple_minus_nsigma(medium_base.IceModelSimple):
+    def __init__(self):
+        # C. Deaconu, fit to data from Hawley '08, Alley '88 minus 1 sigma (delta_n)
+        # rho(z) = 917 - 602 * exp (-z/37.25), using n = 1 + 0.78 rho(z)/rho_0
+        super().__init__(
+            z_bottom = -3000*units.meter,
+            n_ice = 1.78,
+            z_0 = 37.25*units.meter,
+            delta_n = 0.50881,
+            )
+
+class greenland_simple_plus_z0sigma(medium_base.IceModelSimple):
+    def __init__(self):
+        # C. Deaconu, fit to data from Hawley '08, Alley '88 plus 1 sigma (z0)
+        # rho(z) = 917 - 602 * exp (-z/37.25), using n = 1 + 0.78 rho(z)/rho_0
+        super().__init__(
+            z_bottom = -3000*units.meter,
+            n_ice = 1.78,
+            z_0 = 37.44*units.meter,
+            delta_n = 0.51,
+            )
+
+class greenland_simple_minus_z0sigma(medium_base.IceModelSimple):
+    def __init__(self):
+        # C. Deaconu, fit to data from Hawley '08, Alley '88 minus 1 sigma (z0)
+        # rho(z) = 917 - 602 * exp (-z/37.25), using n = 1 + 0.78 rho(z)/rho_0
+        super().__init__(
+            z_bottom = -3000*units.meter,
+            n_ice = 1.78,
+            z_0 = 37.06*units.meter,
+            delta_n = 0.51,
+            )
+
 class greenland_firn(medium_base.IceModel):
     """
     This model can only be used with the radiopropa raytracer.
