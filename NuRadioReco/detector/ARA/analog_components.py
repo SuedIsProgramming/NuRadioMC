@@ -39,7 +39,6 @@ def get_system_response(frequencies, path=None):
     orig_frequencies = system_response['default']['frequencies']
     phase = system_response['default']['phase']
     gain = system_response['default']['gain']
-    print(gain) #checking values
 
     interp_phase = interp1d(orig_frequencies, np.unwrap(phase), bounds_error=False, fill_value=0)
     interp_gain = interp1d(orig_frequencies, gain, bounds_error=False, fill_value=0)
