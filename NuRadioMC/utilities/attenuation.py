@@ -11,7 +11,7 @@ logger = logging.getLogger("NuRadioMC.attenuation")
 
 
 
-model_to_int = {"SP1": 1, "GL1": 2, "MB1": 3, "GL2": 4, "GL3": 5}
+model_to_int = {"SP1": 1, "GL1": 2, "MB1": 3, "GL2": 4, "GL3": 5, "GL3_plus_sigma": 6, "GL3_minus_sigma": 7}
 
 gl3_parameters = np.genfromtxt(
     os.path.join(os.path.dirname(__file__), 'data/GL3_params.csv'),
@@ -161,6 +161,8 @@ def get_attenuation_length(z, frequency, model):
           see: https://arxiv.org/abs/2201.07846, specifically Fig. 7
         * GL3: 2021 Greenland model, using the MacGregor model for depth dependence
           see: https://arxiv.org/abs/2201.07846, specifically Fig. 7
+        * GL3_plus_sigma: GL3 model plus 1 sigma (~20%) from attenuation length value.
+        * GL3_minus_sigma: GL3 model minus 1 sigma (~20%) from attenuation length value.
         * MB1: Moore's Bay Model, from 10.3189/2015JoG14J214 and
           Phd Thesis C. Persichilli (depth dependence)
 
